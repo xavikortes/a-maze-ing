@@ -21,9 +21,10 @@ debug: $(VENV)
 
 clean:
 	rm -rf $(VENV)
-	find . -type d -name __pycache__ -delete
-	find . -type d -name .mypy_cache -delete
-# 	find . -type f -name *.pyc -delete
+	rm -rf .mypy_cache
+	rm -rf **/.mypy_cache
+	rm -rf __pycache__
+	rm -rf **/__pycache__
 
 lint: $(VENV)
 	$(FLAKE) . && $(MYPY) . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
