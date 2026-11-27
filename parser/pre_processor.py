@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Pre-processor for reading KEY=VALUE configuration files."""
 
 
 def pre_processor(filepath: str) -> dict[str, str]:
@@ -20,9 +21,9 @@ def pre_processor(filepath: str) -> dict[str, str]:
     with open(filepath, 'r', encoding="utf-8") as file:
 
         for num_line, line in enumerate(file, start=1):
-            clean_line = line.strip()
+            clean_line = line.split("#", 1)[0].strip()
 
-            if clean_line == "" or clean_line.startswith('#'):
+            if clean_line == "":
                 continue
             if "=" not in clean_line:
                 raise ValueError(
@@ -34,12 +35,10 @@ def pre_processor(filepath: str) -> dict[str, str]:
             value = value.strip()
 
             if key == "" or key in result:
-                raise ValueError(f"Error: {key} repeat or non exists.")
+                raise ValueError(
+                    f"Error: {key} in line {num_line} repeat or non exists."
+                )
 
             result[key] = value
 
     return result
-
-
-if __name__ == "__main__":
-    print(pre_processor('config.txt'))

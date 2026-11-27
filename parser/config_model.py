@@ -7,7 +7,6 @@ from pydantic import (
     ConfigDict,
     Field,
     field_validator,
-    ValidationError,
     model_validator
 )
 
@@ -21,8 +20,16 @@ class MazeConfig(BaseModel):
     ENTRY: tuple[int, int]
     EXIT: tuple[int, int]
     OUTPUT_FILE: str = Field(..., min_length=1)
-    PERFECT: bool
+    PERFECT: bool = False
     SEED: int | None = None
+
+    @field_validator("SEED", mode="before")
+    @classmethod
+    def seed_validator(cls, value: Any) -> Any:
+        """Treat an empty SEED string as None."""
+        if isinstance(value, str) and value.strip() == "":
+            return None
+        return value
 
     @field_validator("ENTRY", "EXIT", mode="before")
     @classmethod
@@ -55,55 +62,3 @@ class MazeConfig(BaseModel):
             raise ValueError("OUTPUT_FILE cannot be empty or whitespace")
 
         return self
-
-
-if __name__ == "__main__":
-    valid_data: dict[str, Any] = {
-        "WIDTH": "20",
-        "HEIGHT": "15",
-        "ENTRY": "0, 0",
-        "EXIT": "19, 14",
-        "OUTPUT_FILE": "maze.txt",
-        "PERFECT": "True",
-        "SEED": "42",
-    }
-
-    try:
-        config = MazeConfig(**valid_data)
-        print("--- CONFIGURACIÓN VÁLIDA ---")
-        print(repr(config))
-        print(f"Tipo de WIDTH: {type(config.WIDTH)}")
-        print(f"Tipo de ENTRY: {type(config.ENTRY)} -> {config.ENTRY}")
-    except ValidationError as err:
-        print(err)
-
-    invalid_data: dict[str, Any] = {
-        "WIDTH": "-5",
-        "HEIGHT": "15",
-        "ENTRY": "0,0,9",
-        "EXIT": "19,14",
-        "OUTPUT_FILE": "maze.txt",
-        "PERFECT": "True",
-        "CLAVE_INVENTADA": "123",
-    }
-
-    try:
-        MazeConfig(**invalid_data)
-    except ValidationError as err:
-        print("\n--- ERRORES DETECTADOS POR PYDANTIC ---")
-        print(err)
-
-    invalid_bounds_data: dict[str, Any] = {
-        "WIDTH": "20",
-        "HEIGHT": "15",
-        "ENTRY": "0, 0",
-        "EXIT": "20, 15",
-        "OUTPUT_FILE": "maze.txt",
-        "PERFECT": "True",
-    }
-
-    try:
-        MazeConfig(**invalid_bounds_data)
-    except ValidationError as err:
-        print("\n--- ERROR DE REGLAS ESPACIALES (FASE 3) ---")
-        print(err)
