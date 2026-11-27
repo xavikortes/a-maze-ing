@@ -2,13 +2,8 @@
 """Configuration data model and validation rules for the maze generator."""
 from typing import Any
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    field_validator,
-    model_validator
-)
+from pydantic import (BaseModel, ConfigDict, Field, field_validator,
+                      model_validator)
 
 
 class MazeConfig(BaseModel):
@@ -20,7 +15,7 @@ class MazeConfig(BaseModel):
     ENTRY: tuple[int, int]
     EXIT: tuple[int, int]
     OUTPUT_FILE: str = Field(..., min_length=1)
-    PERFECT: bool = False
+    PERFECT: bool
     SEED: int | None = None
 
     @field_validator("SEED", mode="before")
